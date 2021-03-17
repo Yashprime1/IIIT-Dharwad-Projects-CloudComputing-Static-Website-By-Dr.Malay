@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Caesar Cipher</title>
+	<!-- Mobile Specific Metas -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<!-- Font-->
+	<link rel="stylesheet" type="text/css" href="css/opensans-font.css">
+	<link rel="stylesheet" type="text/css" href="fonts/line-awesome/css/line-awesome.min.css">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+	<!-- Main Style Css -->
+	<link rel="stylesheet" href="assets/css/index.css" />
+	<script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+	<script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+	<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js"></script>
+	<script src="https://algorithmia.com/v1/clients/js/algorithmia-0.2.1.js" type="text/javascript"></script>
+	<script src="https://unpkg.co/gsap@3/dist/gsap.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+</head>
+
+<body>
+
+	<div id="app"></div>
+	<script>
+
+		function animate() {
+	
+
+			let tl = gsap.timeline(); //create the timeline
+
+			tl.to(".input-copy", { x: 100, width: 0, padding: 0, duration: 1, ease: Power3.easeInOut }, 0)
+				.call(function () {
+					$('.btn-copy').addClass("animated");
+					$('.display--completed').css({ 'display': 'block' });
+				}, null, null, 2)
+				.to(".btn-copy", {}, 1)
+				.to(".btn-addon", { top: '-29px' }, 1)
+				.to(".btn-addon", { zIndex: '4' }, 2)
+				.to(".btn-addon", { top: '0', rotationX: 180 }, 2)
+				.to(".copy-btn-wrapper", { x: '-10' }, 3)
+				.to(".copy-btn-wrapper", { x: 800 }, 4);
+			var getDuration = tl.duration();
+			tl.duration(3);
+		}
+	</script>
+
+	<script type="text/babel">
+		var ciphertext = '';
+
+		class BackCard extends React.Component {
+			state = {
+				'cipher': '',
+				'count': 0
+			}
+			copyFunction = (e) => {
+				var ele2 = document.getElementById('cipher_text');
+				this.setState({
+					'cipher': ele2.value
+				})
+				document.querySelector("#cipher_text").select();
+				document.execCommand('copy');
+				animate();
+				setTimeout(() => {
+					const ele1 = document.querySelector('#form-right');
+					ele1.style.transform = "rotateY(1turn)";
+					ReactDOM.unmountComponentAtNode(document.getElementById('backcard')); 
+				}, 5000)
+			}
+			render() {
+					return (<div className="card__back">
+
+<div className="wrapper--mid">
+	<div className="display">
+		<div className="row">
+				<div className="col-sm-12">
+					<textarea  id="cipher_text" className="input input-copy" rows="1" cols="4"></textarea>
+					</div>
+					<div className="col-sm-12">
+						<div className="copy-btn-wrapper">
+			<div className="btn-addon"></div>
+			<button className="btn btn-copy" onClick={this.copyFunction}>
+				copy
+		</button>
+		</div>
+	</div>
+		</div>
+		<div className="display--completed">
+			Copied &#128516;
+	</div>
+	</div>
+</div>
+</div>);
+		
+			} 
+		}
+
+		class App extends React.Component {
+
+			state = {
+				'plain': '',
+				'key': -1,
+				'cipher': ''
+			}
+			handleChangePT = (e) => {
+				this.setState({
+					'plain': e.target.value
+				})
+			}
+			handleChangeKT = (e) => {
+				this.setState({
+					'key': e.target.value
+				})
+			}
+
+
+
+			caesarCipher = (input, callback) => {
+				Algorithmia.client("simMkJbJLyujDfEuZ68FPiQa+HH1")
+					.algo("Yash0709/Cryptography_Cipher_Encryption_Techniques/0.1.1?timeout=300")
+					.pipe(input)
+					.then(function (output) {
+						console.log(output['result']);
+						callback(output['result'])
+					});
+			}
+
+
+
+
+			handleSubmit = (e) => {
+				e.preventDefault();
+				var newObj = React.createElement(BackCard);
+				ReactDOM.render(newObj, document.getElementById('backcard'));
+				console.log("clicked");
+				var input = this.state.plain.concat("**", this.state.key);
+				var c = "-1"
+				this.caesarCipher(input, (result) => {
+					const ele2 = document.querySelector('#cipher_text');
+					console.log(result);
+					c = result;
+					document.getElementById("cipher_text").value = result;;
+					const ele1 = document.querySelector('#form-right');
+					ele1.style.transform = "rotateY(0.5turn)";
+				})
+			}
+
+			moreInfo = (e) => {
+				window.location.href = "https://www.geeksforgeeks.org/caesar-cipher-in-cryptography/"
+			}
+
+
+
+			render() {
+				return (
+					<div className="form-v4">
+						<div className="page-content">
+							<div className="form-v4-content">
+								<div className="form-left">
+									<h2>Caesar Cipher</h2>
+									<p className="text-1"></p>
+									<p className="text-2"><span>Caesar Cipher</span> technique is one of the earliest and simplest method of encryption technique. It’s simply a type of substitution cipher, i.e., each letter of a given text is replaced by a letter some fixed number of positions down the alphabet.</p>
+									<div className="form-left-last">
+										<button type="submit" name="cipher" className="cipher" onClick={this.moreInfo}>For more info</button>
+									</div>
+								</div>
+								<div className="card" >
+									<div className="card__content" id='form-right'>
+										<div className="card__front">
+											<form className="form-detail" onSubmit={this.handleSubmit} id="myform">
+												<div className="form-group">
+													<div className="form-row form-row-1">
+														<label htmlFor="plain_text">Plain Text</label>
+														<input type="text" name="plain_text" id="plain_text" required onChange={this.handleChangePT} className="input-text"></input>
+													</div>
+													<div className="form-row form-row-1">
+														<label htmlFor="key">Key</label>
+														<input type="number" name="key" id="key" min="0" max="25" onChange={this.handleChangeKT} className="input-text"></input>
+													</div>
+												</div>
+												<div className="form-row-last">
+													<button type="submit" name="cipher" className="cipher">Get Cipher</button>
+												</div>
+											</form>
+										</div>
+										<div id="backcard"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>)
+			}
+		}
+		ReactDOM.render(<App />, document.getElementById('app'))
+
+
+	</script>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+</body>
+
+</html>
